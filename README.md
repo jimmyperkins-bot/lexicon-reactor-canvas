@@ -20,6 +20,7 @@ Students choose a course and a ten-signal mission (four missions each for Englis
 - `docs/CUSTOMIZATION.md` — vocabulary, mission, style, and asset customization
 - `docs/ARCHITECTURE.md` — explanation of the no-JavaScript runtime design
 - `docs/SAT_PREP.md` — SAT Prep sources, mission map, and how to add more SAT missions
+- `bonus-games/` — the restyled Wordle (SAT words), Pac-Man, Connect 4, and Tetris bonus games from the Canvas home page
 
 ## Game design
 

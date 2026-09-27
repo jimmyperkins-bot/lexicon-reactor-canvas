@@ -1,0 +1,67 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Connect 4 Arcade</title><style>
+:root{color-scheme:dark;--ink:#f5fbff;--muted:#a9c1d4;--cyan:#25e6ff;--cyan-soft:#8bf3ff;--pink:#ff4bd8;--gold:#ffd34d;--green:#59f4ad;--red:#ff6282;--blue:#4d9bff;--orange:#ff9a3c;--display:Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif;--body:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+*{box-sizing:border-box}
+html,body{min-height:100%;margin:0;background:#020817}
+body{min-width:0;min-height:100svh;color:var(--ink);font:16px/1.45 var(--body);background-color:#020817;background-image:linear-gradient(rgba(1,8,22,.6),rgba(1,8,22,.88)),url("https://canvas.mckinneyisd.net/courses/179589/files/15361980/download");background-position:center;background-size:cover;background-attachment:fixed}
+button{font:inherit}
+button:focus-visible{outline:3px solid rgba(255,211,77,.85);outline-offset:3px}
+.app{max-width:1000px;margin:auto;padding:18px}
+.head,.card{position:relative;overflow:hidden;border:1px solid rgba(62,224,255,.55);border-radius:13px 30px 13px 30px;background:linear-gradient(145deg,rgba(7,32,62,.9),rgba(2,12,28,.94));box-shadow:0 24px 60px rgba(0,0,0,.55),inset 0 0 60px rgba(37,230,255,.05);backdrop-filter:blur(10px)}
+.head{margin-bottom:14px;padding:18px 24px 17px}
+.head::after{content:"";position:absolute;inset:auto 0 0;height:3px;background:linear-gradient(90deg,var(--cyan),var(--pink),var(--gold));box-shadow:0 0 18px rgba(37,230,255,.6)}
+.eyebrow{color:var(--cyan);font-size:.7rem;font-weight:850;letter-spacing:.2em;text-transform:uppercase}
+.head h1{margin:4px 0 0;font-family:var(--display);font-size:clamp(2.2rem,6vw,3.4rem);font-style:italic;font-weight:900;letter-spacing:.05em;line-height:.92;text-transform:uppercase;text-shadow:0 0 24px rgba(37,230,255,.5)}
+.head h1 span{color:var(--gold);text-shadow:0 0 22px rgba(255,211,77,.45)}
+.head p{margin:8px 0 0;color:#c8ddea}
+.hud{display:grid;gap:9px;margin:0 0 14px}
+.stat{padding:10px 12px 9px;border:1px solid rgba(37,230,255,.32);border-radius:9px 16px 9px 16px;background:rgba(2,15,34,.82);box-shadow:inset 0 0 18px rgba(37,230,255,.05)}
+.label{display:block;color:var(--muted);font-size:.64rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
+.value{display:block;margin-top:3px;color:var(--cyan);font-family:var(--display);font-size:1.6rem;font-weight:400;letter-spacing:.05em;line-height:1;text-shadow:0 0 14px rgba(37,230,255,.5)}
+.layout{display:grid;gap:14px}
+.card{padding:16px}
+.actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:14px}
+.btn,.pad button{min-height:43px;padding:10px 16px;color:#eef9ff;border:1px solid rgba(37,230,255,.58);border-radius:9px 15px 9px 15px;background:rgba(7,34,64,.92);font-size:.76rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:transform .12s ease,background .12s ease,border-color .12s ease}
+.btn:hover,.pad button:hover{transform:translateY(-1px);border-color:var(--cyan);background:rgba(8,48,83,.96)}
+.btn.primary{color:#00131f;border-color:transparent;background:linear-gradient(90deg,var(--cyan),#91f4ff 55%,var(--gold));box-shadow:0 10px 26px rgba(37,230,255,.25)}
+.btn.primary:hover{filter:brightness(1.08)}
+.side{display:grid;gap:12px;align-content:start}
+.side h2{margin:0 0 8px;color:var(--cyan);font-size:.74rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
+.side p,.side li{color:#bdd1df;font-size:.92rem}
+.side p{margin:6px 0}
+.side ul{margin:6px 0;padding-left:18px}
+.side b{color:var(--ink)}
+.dot{display:inline-block;width:12px;height:12px;margin-right:7px;border-radius:50%;vertical-align:middle}
+.status{min-height:1.5em;margin:12px 0 0;color:var(--gold);font-size:.84rem;font-weight:900;letter-spacing:.08em;text-align:center;text-transform:uppercase;text-shadow:0 0 14px rgba(255,211,77,.35)}
+.touch{display:none;justify-items:center;margin-top:14px}
+.pad{display:grid;grid-template-columns:repeat(3,56px);gap:7px}
+.pad button{min-height:48px;padding:6px;font-size:1.25rem;letter-spacing:0}
+.pad .up{grid-column:2}
+canvas:focus{outline:none}
+canvas:focus-visible{outline:2px solid rgba(255,211,77,.8);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+.hud{grid-template-columns:repeat(4,1fr)}
+.layout{grid-template-columns:minmax(300px,1fr) 240px}
+.board-shell{position:relative;max-width:630px;margin:auto;padding:14px;border:1px solid rgba(37,230,255,.6);border-radius:12px 26px 12px 26px;background:linear-gradient(160deg,#06224a,#031027 70%);box-shadow:0 0 34px rgba(37,230,255,.2),inset 0 0 40px rgba(37,230,255,.08)}
+.board{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.column{position:relative;padding:3px;border:0;border-radius:12px;background:transparent;cursor:pointer;transition:background .15s ease}
+.column:hover,.column:focus-visible{background:rgba(37,230,255,.12);box-shadow:inset 0 0 0 1px rgba(37,230,255,.45)}
+.cell{display:grid;place-items:center;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 40%,#030c1d,#01060f);box-shadow:inset 0 3px 8px rgba(0,0,0,.9),0 0 0 2px rgba(37,230,255,.22)}
+.disc{width:100%;height:100%;border-radius:50%;transform:scale(.08);opacity:0;transition:transform .22s ease,opacity .18s ease;background:radial-gradient(circle at 35% 30%,#bfe0ff,var(--blue) 45%,#1a4fd6);box-shadow:0 0 16px rgba(77,155,255,.7),inset 0 -4px 8px rgba(0,0,0,.35)}
+.disc.show{transform:scale(1);opacity:1}
+.disc.p2{background:radial-gradient(circle at 35% 30%,#ffe2bd,var(--orange) 45%,#d45a0d);box-shadow:0 0 16px rgba(255,154,60,.7),inset 0 -4px 8px rgba(0,0,0,.35)}
+.disc.win{outline:3px solid var(--gold);outline-offset:1px;animation:pulse .7s ease-in-out infinite alternate}
+@keyframes pulse{to{filter:brightness(1.35);transform:scale(.91)}}
+.p1{background:var(--blue);box-shadow:0 0 10px var(--blue)}
+.p2d{background:var(--orange);box-shadow:0 0 10px var(--orange)}
+.help{margin:10px 0 0;color:var(--muted);font-size:.86rem;text-align:center}
+@media(max-width:760px){.app{padding:10px}.layout{grid-template-columns:1fr}.side{grid-template-columns:1fr 1fr}.side .rules{grid-column:1/-1}.hud{grid-template-columns:repeat(2,1fr)}.board{gap:5px}.card{padding:12px}}
+@media(max-width:420px){.app{padding:6px}.head,.card{border-radius:10px 22px 10px 22px}.board-shell{padding:7px}.board{gap:3px}.side{grid-template-columns:1fr}.side .rules{grid-column:auto}.stat{padding:8px}}
+</style></head><body><main class="app"><header class="head"><div class="eyebrow">TWO PLAYER ARCADE</div><h1>Connect 4 <span>Arcade</span></h1><p>Drop a disc, block your opponent, and connect four.</p></header><section class="hud" aria-label="Match status"><div class="stat"><span class="label">TURN</span><span class="value" id="turn">P1</span></div><div class="stat"><span class="label">STATUS</span><span class="value" id="short">PLAY</span></div><div class="stat"><span class="label">BLUE WINS</span><span class="value" id="p1Score">0</span></div><div class="stat"><span class="label">ORANGE WINS</span><span class="value" id="p2Score">0</span></div></section><section class="layout"><section class="card"><div class="board-shell"><div class="board" id="board" role="grid" aria-label="Connect Four board"></div></div><p class="status" id="status" aria-live="polite">Player 1's turn. Choose a column.</p><div class="actions"><button class="btn primary" id="round">New round</button><button class="btn" id="match">Reset match</button></div><p class="help">Keyboard: Left/Right selects a column, Enter or Space drops a disc.</p></section><aside class="side"><section class="card"><h2>Players</h2><p><i class="dot p1"></i>Player 1 — Blue</p><p><i class="dot p2d"></i>Player 2 — Orange</p></section><section class="card rules"><h2>How to play</h2><ul><li>Choose any column to drop a disc.</li><li>Connect four horizontally, vertically, or diagonally.</li><li>Use New round to keep the match score.</li><li>Use Reset match to clear saved scores.</li></ul></section></aside></section></main><script>
+(()=>{'use strict';const ROWS=6,COLS=7,SCORE_KEY='canvas-connect4-score-v2',boardEl=document.getElementById('board'),turnEl=document.getElementById('turn'),shortEl=document.getElementById('short'),status=document.getElementById('status'),p1El=document.getElementById('p1Score'),p2El=document.getElementById('p2Score');let board,player,over,active=3,scores=JSON.parse(localStorage.getItem(SCORE_KEY)||'{"p1":0,"p2":0}');
+function save(){localStorage.setItem(SCORE_KEY,JSON.stringify(scores))}function hud(msg){turnEl.textContent=player===1?'P1':'P2';shortEl.textContent=over?'END':'PLAY';p1El.textContent=scores.p1;p2El.textContent=scores.p2;status.textContent=msg||`Player ${player}'s turn. Choose a column.`}
+function build(){board=Array.from({length:ROWS},()=>Array(COLS).fill(0));player=1;over=false;boardEl.innerHTML='';for(let c=0;c<COLS;c++){const col=document.createElement('button');col.className='column';col.type='button';col.dataset.col=c;col.setAttribute('role','gridcell');col.setAttribute('aria-label',`Column ${c+1}`);col.addEventListener('click',()=>drop(c));col.addEventListener('focus',()=>active=c);for(let r=0;r<ROWS;r++){const cell=document.createElement('span');cell.className='cell';cell.setAttribute('aria-hidden','true');const disc=document.createElement('span');disc.className='disc';cell.append(disc);col.append(cell)}boardEl.append(col)}hud()}
+function cell(r,c){return boardEl.children[c].children[r].firstChild}function drop(c){if(over||board[0][c])return;let r=ROWS-1;while(board[r][c])r--;board[r][c]=player;const d=cell(r,c);d.className='disc show '+(player===2?'p2':'');const win=find(r,c);if(win){over=true;win.forEach(x=>cell(x.r,x.c).classList.add('win'));scores[player===1?'p1':'p2']++;save();hud(`Player ${player} wins! Start a new round when ready.`);return}if(board[0].every(Boolean)){over=true;hud('Draw game! Start a new round when ready.');return}player=player===1?2:1;active=c;hud()}
+function find(r,c){for(const [dr,dc] of [[0,1],[1,0],[1,1],[1,-1]]){const line=[{r,c}];for(const s of [-1,1]){let rr=r+dr*s,cc=c+dc*s;while(rr>=0&&rr<ROWS&&cc>=0&&cc<COLS&&board[rr][cc]===player){s<0?line.unshift({r:rr,c:cc}):line.push({r:rr,c:cc});rr+=dr*s;cc+=dc*s}}if(line.length>=4)return line.slice(0,4)}return null}
+function focusColumn(){boardEl.children[active].focus()}document.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','Enter',' '].includes(e.key)){e.preventDefault();if(e.key==='ArrowLeft'){active=(active+COLS-1)%COLS;focusColumn()}else if(e.key==='ArrowRight'){active=(active+1)%COLS;focusColumn()}else drop(active)}});document.getElementById('round').addEventListener('click',build);document.getElementById('match').addEventListener('click',()=>{scores={p1:0,p2:0};save();build()});build()})();
+</script></body></html>
