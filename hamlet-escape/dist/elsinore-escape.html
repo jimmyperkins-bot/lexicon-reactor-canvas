@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Elsinore Escape — A Hamlet Escape Room</title>
+<style>
+:root{color-scheme:dark;--ink:#f3ead6;--muted:#b9ad93;--gold:#e0b862;--gold-soft:#f5dca0;--ember:#e0772e;--ghost:#8fefff;--ghost-soft:rgba(143,239,255,.18);--blood:#e0566b;--good:#7ee0a4;--stone:rgba(16,20,32,.86);--line:rgba(224,184,98,.45);--serif:"Palatino Linotype","Book Antiqua",Palatino,Georgia,"Times New Roman",serif;--sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#04060c}
+body{position:relative;min-height:100svh;overflow-x:hidden;color:var(--ink);font:16px/1.5 var(--sans);background:radial-gradient(circle at 82% 8%,rgba(236,240,255,.55) 0 2.2%,rgba(170,190,255,.16) 4%,transparent 15%),radial-gradient(ellipse at 50% 120%,rgba(224,119,46,.18),transparent 55%),linear-gradient(#05070f,#0a1022 55%,#0d1326)}
+.sky{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,#fff8 50%,transparent 51%),radial-gradient(1px 1px at 28% 9%,#fff6 50%,transparent 51%),radial-gradient(1.5px 1.5px at 44% 22%,#fff7 50%,transparent 51%),radial-gradient(1px 1px at 63% 14%,#fff5 50%,transparent 51%),radial-gradient(1px 1px at 71% 31%,#fff6 50%,transparent 51%),radial-gradient(1.5px 1.5px at 9% 38%,#fff5 50%,transparent 51%),radial-gradient(1px 1px at 91% 27%,#fff7 50%,transparent 51%),radial-gradient(1px 1px at 37% 35%,#fff4 50%,transparent 51%),radial-gradient(1px 1px at 55% 5%,#fff6 50%,transparent 51%)}
+.castle{position:fixed;left:0;right:0;bottom:0;z-index:0;height:34vh;min-height:190px;pointer-events:none;opacity:.95}
+.castle svg{width:100%;height:100%;display:block}
+.fog{position:fixed;left:-20%;right:-20%;bottom:-4vh;z-index:1;height:30vh;pointer-events:none;background:radial-gradient(ellipse at 30% 60%,rgba(170,190,220,.16),transparent 60%),radial-gradient(ellipse at 75% 70%,rgba(170,190,220,.12),transparent 55%);filter:blur(6px);animation:drift 26s ease-in-out infinite alternate}
+.fog.two{bottom:4vh;opacity:.7;animation-duration:38s;animation-direction:alternate-reverse}
+@keyframes drift{to{transform:translateX(9%)}}
+main{position:relative;z-index:2;max-width:900px;margin:0 auto;padding:18px 14px 60px}
+.panel{position:relative;border:1px solid var(--line);border-radius:6px 22px 6px 22px;background:linear-gradient(160deg,rgba(24,28,44,.92),rgba(10,12,22,.94));box-shadow:0 24px 60px rgba(0,0,0,.6),inset 0 0 50px rgba(224,184,98,.05);backdrop-filter:blur(6px)}
+.panel::before{content:"";position:absolute;inset:6px;border:1px solid rgba(224,184,98,.14);border-radius:4px 18px 4px 18px;pointer-events:none}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;margin-bottom:12px}
+.brand{font-family:var(--serif);font-size:1.05rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-soft)}
+.brand b{color:var(--ghost);font-weight:400;text-shadow:0 0 12px rgba(143,239,255,.6)}
+.stats{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:rgba(6,8,16,.7);color:var(--muted);font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.chip strong{color:var(--gold-soft)}
+h1,h2,h3{font-family:var(--serif);font-weight:400;margin:0}
+.title{padding:34px 26px 28px;text-align:center}
+.title .kicker{color:var(--ghost);font-size:.74rem;font-weight:800;letter-spacing:.3em;text-transform:uppercase;text-shadow:0 0 14px rgba(143,239,255,.55)}
+.title h1{margin:8px 0 4px;font-size:clamp(2.6rem,9vw,4.4rem);letter-spacing:.08em;line-height:1;color:var(--gold-soft);text-shadow:0 0 30px rgba(224,184,98,.35),0 3px 0 #000}
+.title .sub{margin:0 auto;max-width:36ch;color:#d9ceb4;font-family:var(--serif);font-style:italic;font-size:1.15rem}
+.ornament{display:flex;align-items:center;gap:12px;justify-content:center;margin:18px auto;color:var(--gold);max-width:420px}
+.ornament::before,.ornament::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0 22px;text-align:left}
+.rule{padding:12px;border:1px solid rgba(224,184,98,.25);border-radius:4px 14px 4px 14px;background:rgba(6,8,16,.55);font-size:.9rem;color:#d8cdb2}
+.rule b{display:block;margin-bottom:3px;color:var(--gold-soft);font-family:var(--serif);font-size:1.02rem;font-weight:400}
+label.field{display:block;max-width:420px;margin:0 auto;text-align:left;color:var(--muted);font-size:.78rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+input.text{display:block;width:100%;margin-top:6px;padding:12px 14px;color:var(--ink);border:1px solid var(--line);border-radius:4px 14px 4px 14px;background:rgba(4,6,12,.85);font:1.1rem var(--serif);letter-spacing:.02em}
+input.text:focus{outline:2px solid var(--ghost);outline-offset:2px;border-color:transparent}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 20px;color:#1b1206;border:0;border-radius:4px 16px 4px 16px;background:linear-gradient(180deg,#f7dc9a,#d9a746 60%,#b9832a);box-shadow:0 8px 22px rgba(224,184,98,.25),inset 0 1px 0 #fff8;font:700 .9rem var(--sans);letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:transform .12s ease,filter .12s ease}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.07)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn.ghost{color:var(--gold-soft);background:rgba(6,8,16,.7);border:1px solid var(--line);box-shadow:none}
+.btn.small{min-height:36px;padding:6px 12px;font-size:.72rem}
+button:focus-visible,.opt:focus-visible{outline:3px solid var(--ghost);outline-offset:3px}
+.row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:16px}
+.err{min-height:1.4em;margin:8px 0 0;color:var(--blood);font-size:.88rem;font-weight:700;text-align:center}
+/* map */
+.maphead{padding:18px 22px;text-align:center}
+.maphead h2{font-size:1.9rem;color:var(--gold-soft);letter-spacing:.06em}
+.maphead p{margin:4px 0 0;color:var(--muted)}
+.path{display:grid;gap:10px;margin-top:12px}
+.room{display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;padding:14px 16px}
+.seal{display:grid;place-items:center;width:58px;height:58px;border-radius:50%;border:2px solid rgba(224,184,98,.5);background:radial-gradient(circle at 40% 35%,#2a2438,#0c0a14);font-family:var(--serif);font-size:1.3rem;color:var(--gold-soft)}
+.room.done .seal{border-color:var(--gold);background:radial-gradient(circle at 40% 35%,#f7dc9a,#b9832a);color:#241604;box-shadow:0 0 20px rgba(224,184,98,.45)}
+.room.current .seal{border-color:var(--ghost);box-shadow:0 0 22px rgba(143,239,255,.45);animation:pulse 2.4s ease-in-out infinite}
+.room.locked{opacity:.5}
+.room h3{font-size:1.25rem;color:var(--ink)}
+.room p{margin:2px 0 0;color:var(--muted);font-size:.9rem}
+.status{color:var(--muted);font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.room.done .status{color:var(--gold)}
+@keyframes pulse{50%{box-shadow:0 0 34px rgba(143,239,255,.7)}}
+/* puzzle */
+.phead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;padding:16px 20px 12px;border-bottom:1px solid rgba(224,184,98,.2)}
+.phead .act{color:var(--ghost);font-size:.72rem;font-weight:800;letter-spacing:.24em;text-transform:uppercase}
+.phead h2{font-size:1.6rem;color:var(--gold-soft)}
+.pips{display:flex;gap:6px}
+.pip{width:26px;height:8px;border-radius:99px;background:rgba(224,184,98,.18);border:1px solid rgba(224,184,98,.35)}
+.pip.on{background:var(--gold);box-shadow:0 0 10px rgba(224,184,98,.6)}
+.pip.now{background:var(--ghost);border-color:var(--ghost);box-shadow:0 0 10px rgba(143,239,255,.6)}
+.pbody{padding:18px 20px 22px}
+.ptype{color:var(--muted);font-size:.72rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
+.ptype span{color:var(--gold)}
+.quote{margin:12px 0 18px;padding:18px 22px;border-left:3px solid var(--ghost);background:linear-gradient(90deg,var(--ghost-soft),transparent);font-family:var(--serif);font-size:clamp(1.25rem,3.4vw,1.7rem);font-style:italic;line-height:1.4;color:#f7f0de;white-space:pre-line}
+.prompt{margin:10px 0 16px;font-family:var(--serif);font-size:clamp(1.12rem,2.8vw,1.35rem);line-height:1.45}
+.opts{display:grid;gap:10px}
+.opts.cast{grid-template-columns:repeat(4,1fr)}
+.opt{display:flex;align-items:center;gap:12px;width:100%;min-height:54px;padding:12px 14px;color:var(--ink);text-align:left;border:1px solid rgba(224,184,98,.3);border-radius:4px 14px 4px 14px;background:rgba(6,8,16,.72);font:1rem/1.35 var(--sans);cursor:pointer;transition:transform .12s ease,border-color .12s ease,background .12s ease}
+.opt:hover:not(:disabled){transform:translateY(-1px);border-color:var(--gold);background:rgba(30,26,20,.85)}
+.opt .k{flex:0 0 auto;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);color:var(--gold);font:700 .8rem var(--sans)}
+.opts.cast .opt{flex-direction:column;justify-content:center;text-align:center;min-height:120px}
+.mono{display:grid;place-items:center;width:58px;height:58px;border-radius:50%;border:2px solid rgba(224,184,98,.55);background:radial-gradient(circle at 40% 35%,#352b1d,#100c07);font-family:var(--serif);font-size:1.5rem;color:var(--gold-soft)}
+.opt.wrong{border-color:var(--blood);background:rgba(70,14,24,.6);color:#f1b9c2;cursor:not-allowed}
+.opt.right{border-color:var(--good);background:rgba(16,60,40,.65)}
+.shake{animation:shake .38s ease}
+@keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+.order-slots{display:grid;gap:8px;margin-bottom:14px}
+.slot{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:center;min-height:50px;padding:8px 12px;border:1px dashed rgba(143,239,255,.4);border-radius:4px 14px 4px 14px;background:rgba(6,10,20,.55);color:var(--muted);font-size:.95rem;text-align:left;cursor:pointer}
+.slot.filled{border-style:solid;border-color:rgba(224,184,98,.55);color:var(--ink);background:rgba(30,26,20,.7)}
+.slot .n{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:rgba(143,239,255,.14);color:var(--ghost);font:800 .85rem var(--sans)}
+.pool{display:grid;gap:8px}
+.pool .opt{min-height:48px}
+.pool-label{margin:4px 0 8px;color:var(--muted);font-size:.72rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.door{display:grid;grid-template-columns:120px 1fr;gap:20px;align-items:center}
+.doorart{width:120px;height:160px;border:2px solid var(--gold);border-radius:60px 60px 6px 6px;background:repeating-linear-gradient(90deg,#3a2615 0 18px,#2c1c10 18px 20px);box-shadow:inset 0 0 30px #000c,0 0 24px rgba(224,184,98,.25);position:relative}
+.doorart::after{content:"";position:absolute;right:16px;top:50%;width:12px;height:12px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold)}
+.doorart.open{background:radial-gradient(ellipse at 50% 60%,rgba(143,239,255,.55),rgba(10,14,28,.9) 70%);border-color:var(--ghost);box-shadow:0 0 34px rgba(143,239,255,.55)}
+.doorart.open::after{display:none}
+.feedback{margin-top:16px;padding:14px 16px;border:1px solid rgba(126,224,164,.5);border-radius:4px 14px 4px 14px;background:rgba(12,48,32,.55)}
+.feedback b{display:block;color:var(--good);font-family:var(--serif);font-size:1.1rem;font-weight:400}
+.feedback p{margin:4px 0 0;color:#d9efe1}
+.hintbox{margin-top:14px;padding:12px 14px;border:1px solid rgba(143,239,255,.4);border-radius:4px 14px 4px 14px;background:rgba(10,30,44,.55);color:#d2f6ff}
+.hintbox b{color:var(--ghost)}
+.tools{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;margin-top:18px}
+.ref{color:var(--muted);font-size:.78rem;font-weight:700;letter-spacing:.08em}
+/* clear + cert */
+.clear{padding:34px 24px;text-align:center}
+.key{display:inline-grid;place-items:center;width:110px;height:110px;margin-bottom:10px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fff0c0,#e0b862 45%,#8a5a18);box-shadow:0 0 40px rgba(224,184,98,.55);font-size:3rem;color:#2a1a05;animation:flicker 3s ease-in-out infinite}
+@keyframes flicker{50%{box-shadow:0 0 60px rgba(224,119,46,.6)}}
+.clear h2{font-size:2.2rem;color:var(--gold-soft)}
+.clear p{max-width:48ch;margin:8px auto 0;color:#d8cdb2}
+.cert{padding:26px 22px;text-align:center}
+.parch{margin:16px auto 0;max-width:620px;padding:26px 24px;color:#2b1d0c;border-radius:4px;background:radial-gradient(ellipse at 50% 40%,#fbf1d6,#ecd9a8 70%,#d9bf83);box-shadow:0 20px 50px rgba(0,0,0,.6),inset 0 0 40px rgba(120,80,20,.35);font-family:var(--serif)}
+.parch .ct{font-size:.8rem;letter-spacing:.3em;text-transform:uppercase;color:#6d4b1a}
+.parch h2{margin:6px 0;font-size:2rem;color:#3a250b}
+.parch .who{margin:12px 0 4px;font-size:1.7rem;font-style:italic;border-bottom:1px solid #a88445;display:inline-block;padding:0 16px 4px}
+.parch dl{display:grid;grid-template-columns:auto auto;gap:4px 18px;justify-content:center;margin:16px 0 8px;font-family:var(--sans);font-size:.92rem}
+.parch dt{text-align:right;color:#6d4b1a;font-weight:700}
+.parch dd{margin:0;text-align:left}
+.parch .code{margin-top:10px;font:800 1.3rem ui-monospace,Menlo,Consolas,monospace;letter-spacing:.12em;color:#5a1020}
+textarea.certtext{display:block;width:100%;max-width:620px;margin:16px auto 0;min-height:220px;padding:12px;color:var(--ink);border:1px solid var(--line);border-radius:6px;background:rgba(4,6,12,.9);font:.9rem/1.45 ui-monospace,Menlo,Consolas,monospace;resize:vertical}
+.steps{max-width:620px;margin:16px auto 0;text-align:left;color:#d8cdb2}
+.steps li{margin:4px 0}
+.modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.65)}
+.modal .panel{max-width:620px;width:100%;max-height:86vh;overflow:auto;padding:20px 22px}
+.cast-list{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-top:10px}
+.cast-list div{font-size:.92rem;color:#d8cdb2}
+.cast-list b{color:var(--gold-soft);font-family:var(--serif);font-weight:400;font-size:1.02rem}
+@media(max-width:700px){.rules{grid-template-columns:1fr}.opts.cast{grid-template-columns:repeat(2,1fr)}.door{grid-template-columns:1fr;justify-items:center}.room{grid-template-columns:52px 1fr}.room .go{grid-column:1/-1}.seal{width:48px;height:48px}.cast-list{grid-template-columns:1fr}.phead{flex-direction:column;align-items:flex-start}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="sky" aria-hidden="true"></div>
+<div class="castle" aria-hidden="true"><svg viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice"><path fill="#03040a" d="M0 300V222h40v-26h18v26h30v-60h-10v-22h14v-18h10v18h14v22h-10v60h44v-40h16v-18h12v18h16v40h60V150h-14v-26h16V98h-10V76h40v22h-10v26h16v26h-14v72h40v-30h14v-14h10v14h14v30h60v-96h-12V88h12V64h-8V44h14V28h8v16h14v20h-8v24h12v38h-12v96h36v-60h-10v-22h14v-18h10v18h14v22h-10v60h58V160h-12v-24h14v-20h12v20h14v24h-12v62h44v-36h16v-18h12v18h16v36h70v-50h-12v-20h14v-16h10v16h14v20h-12v50h40v-56h-10v-22h12v-18h10v18h12v22h-10v56h60v-30h14v-14h10v14h14v30H1200V300z"/><g fill="#e0b862" opacity=".85"><rect x="378" y="112" width="6" height="10"/><rect x="516" y="98" width="6" height="11"/><rect x="530" y="140" width="5" height="9"/><rect x="738" y="178" width="6" height="10"/><rect x="120" y="178" width="5" height="9"/></g></svg></div>
+<div class="fog" aria-hidden="true"></div><div class="fog two" aria-hidden="true"></div>
+<main id="app" aria-live="polite"></main>
+<script>
+(() => {
+'use strict';
+const CHAMBERS = [{"act":"I","name":"The Battlements","tagline":"Midnight on the castle walls. The guards have seen something.","puzzles":[{"type":"speaker","ref":"1.4","quote":"Something is rotten in the state of Denmark.","options":["Horatio","Marcellus","Hamlet","Bernardo"],"answer":"Marcellus","hint":"It is not Hamlet. One of the guards says it as Hamlet follows the Ghost.","explain":"Marcellus says it as Hamlet follows the Ghost. The line sets up the play’s image of Denmark as diseased or corrupt."},{"type":"order","ref":"Act 1","prompt":"Put these events from Act 1 in order.","items":["The guards and Horatio see the Ghost on the battlements.","Claudius and Gertrude urge Hamlet to stop mourning his father.","Laertes and Polonius warn Ophelia to keep away from Hamlet.","The Ghost tells Hamlet that Claudius murdered him."],"hint":"The play opens at night with the guards; the Ghost does not speak to Hamlet until the last scene of the act.","explain":"Scene 1 is the guards and the Ghost. Scene 2 is the court and Claudius. Scene 3 is Laertes, Polonius, and Ophelia. In Scene 5 the Ghost finally speaks to Hamlet."},{"type":"choice","ref":"1.2","prompt":"“A little more than kin, and less than kind.” What does Hamlet mean by this aside about Claudius?","options":["Claudius is now more than a relative (uncle and stepfather), but Hamlet feels no warmth or kinship with him.","Claudius is a kind man who deserves more respect than he is given.","Hamlet wishes Claudius were a closer relative so he could inherit the throne.","Hamlet is joking that Claudius is not really related to the royal family."],"answer":0,"hint":"Kin means family. Kind has two meanings here: gentle, and of the same nature.","explain":"Hamlet puns on “kin” and “kind.” Claudius is now doubly related to him as uncle and stepfather, but they are not alike and Hamlet feels no affection for him."},{"type":"choice","ref":"1.5","prompt":"According to the Ghost, how was King Hamlet murdered?","options":["Claudius poured poison into his ear while he slept in the orchard.","Claudius stabbed him during a hunting trip.","Gertrude put poison in his wine at a feast.","He was killed in battle against Norway, and Claudius let it happen."],"answer":0,"hint":"The official story is that a serpent stung him while he slept.","explain":"The Ghost says Claudius poured “juice of cursèd hebona” into his ear as he slept in the orchard. Remember this detail: the play-within-a-play in Act 3 restages it."}],"door":{"ref":"1.5","prompt":"The Ghost’s parting words to Hamlet: “Adieu, adieu, adieu! _______ me.”","answers":["remember"],"hint":"Hamlet repeats this word again and again after the Ghost leaves.","explain":"“Remember me.” Hamlet swears to wipe everything else from his memory and remember only his father’s command."}},{"act":"II","name":"Polonius’s Study","tagline":"Everyone is watching Hamlet. Hamlet is watching everyone.","puzzles":[{"type":"speaker","ref":"2.2","quote":"Though this be madness, yet there is method in ’t.","options":["Hamlet","Polonius","Claudius","Rosencrantz"],"answer":"Polonius","hint":"The speaker says it in an aside while questioning Hamlet, and suspects his madness might not be what it seems.","explain":"Polonius says it in an aside after Hamlet’s sharp, witty answers. Even Polonius notices that Hamlet’s “madness” has a strange logic to it."},{"type":"choice","ref":"2.2","prompt":"Polonius tells the King and Queen, “Brevity is the soul of wit.” Why is this line ironic?","options":["Polonius is famously long-winded, and he says it in the middle of a rambling speech.","Polonius is actually the wittiest character in the play.","The King asks him to speak at length, and he refuses.","Polonius is quoting Hamlet, whom he considers foolish."],"answer":0,"hint":"Brevity means using few words. Does Polonius use few words?","explain":"Polonius praises brevity while being anything but brief. Gertrude even interrupts him: “More matter with less art.”"},{"type":"choice","ref":"2.2","prompt":"Why do Rosencrantz and Guildenstern come to Elsinore?","options":["Claudius and Gertrude sent for them to find out what is troubling Hamlet.","They are actors hired to perform a play for the court.","Fortinbras sent them to spy on the Danish army.","Hamlet invited them to help him get revenge on Claudius."],"answer":0,"hint":"They are Hamlet’s old school friends, but someone else summoned them.","explain":"Claudius and Gertrude summon Hamlet’s old school friends to find out the cause of his “transformation.” Hamlet quickly gets them to admit they “were sent for.”"},{"type":"order","ref":"Act 2","prompt":"Put these events from Act 2 in order.","items":["Polonius sends Reynaldo to spy on Laertes in Paris.","Ophelia tells her father about Hamlet’s strange, disheveled visit.","Claudius and Gertrude welcome Rosencrantz and Guildenstern.","The traveling players arrive, and Hamlet asks for a speech."],"hint":"Scene 1 belongs to Polonius’s household; Scene 2 begins with the King and Queen greeting visitors.","explain":"Act 2 Scene 1 is Polonius, Reynaldo, and then Ophelia. Scene 2 is Rosencrantz and Guildenstern, and later the players."}],"door":{"ref":"2.2","prompt":"Hamlet’s plan at the end of Act 2: “The play’s the thing / Wherein I’ll catch the _______ of the King.”","answers":["conscience"],"hint":"It is the inner sense of right and wrong that makes guilty people uneasy.","explain":"Hamlet will stage a play that mirrors the murder. If Claudius reacts, his guilty conscience will prove the Ghost told the truth."}},{"act":"III","name":"The Great Hall","tagline":"Tonight the players perform The Mousetrap.","puzzles":[{"type":"order","ref":"3.1","prompt":"Rebuild the opening of Hamlet’s most famous soliloquy.","items":["To be, or not to be, that is the question:","Whether ’tis nobler in the mind to suffer","The slings and arrows of outrageous fortune,","Or to take arms against a sea of troubles"],"hint":"Hamlet first states the question, then describes the two choices: suffering, or fighting back.","explain":"Hamlet weighs enduring life’s pain (“slings and arrows”) against fighting back or ending it (“take arms against a sea of troubles”)."},{"type":"speaker","ref":"3.1","quote":"O, what a noble mind is here o’erthrown!","options":["Gertrude","Ophelia","Horatio","Claudius"],"answer":"Ophelia","hint":"The speaker has just been told “Get thee to a nunnery.”","explain":"After Hamlet’s harsh words in the “nunnery” scene, Ophelia grieves over what she believes is his madness."},{"type":"choice","ref":"3.2","prompt":"During The Mousetrap, the player pours poison into the sleeping king’s ear. What does Claudius do?","options":["He rises, calls for lights, and storms out.","He applauds and asks the players to perform again.","He confesses the murder in front of the court.","He orders the guards to arrest Hamlet on the spot."],"answer":0,"hint":"His reaction is not a confession, but it is enough for Hamlet and Horatio.","explain":"Claudius cries “Give me some light. Away!” and leaves. For Hamlet this proves his guilt: “I’ll take the ghost’s word for a thousand pound.”"},{"type":"choice","ref":"3.3","prompt":"Hamlet finds Claudius alone, praying. Why doesn’t he kill him?","options":["He fears that killing Claudius at prayer would send his soul to heaven.","Guards arrive before he can draw his sword.","He decides the Ghost was lying after all.","Gertrude begs him to spare Claudius."],"answer":0,"hint":"Hamlet thinks about where his father’s soul went, and where Claudius’s soul would go.","explain":"Hamlet wants Claudius damned, not saved, so he waits for a sinful moment. The irony: Claudius admits his prayers are not sincere (“My words fly up, my thoughts remain below”)."}],"door":{"ref":"3.4","prompt":"In Gertrude’s room, Hamlet stabs Polonius, who is hiding behind the _______ (a hanging tapestry).","answers":["arras","arras curtain"],"hint":"It is a five-letter word for a wall tapestry, named after a French town.","explain":"Hamlet stabs through the arras, crying “How now, a rat? Dead for a ducat, dead!” He hoped it was Claudius. It was Polonius."}},{"act":"IV","name":"The Queen’s Garden","tagline":"Sorrows arrive, not as single spies, but in battalions.","puzzles":[{"type":"speaker","ref":"4.5","quote":"When sorrows come, they come not single spies, / But in battalions.","options":["Laertes","Gertrude","Claudius","Horatio"],"answer":"Claudius","hint":"The speaker lists recent troubles: Polonius’s death, Hamlet’s exile, Ophelia’s madness, and angry citizens.","explain":"Claudius says it to Gertrude as troubles pile up: Polonius murdered, Hamlet gone, Ophelia mad, the people restless, and Laertes secretly back."},{"type":"choice","ref":"4.3","prompt":"Claudius sends Hamlet to England with sealed letters. What do the letters order?","options":["That the King of England put Hamlet to death immediately.","That Hamlet be married to an English princess.","That England send an army to help Denmark fight Norway.","That Hamlet be kept in England until he recovers from his madness."],"answer":0,"hint":"Claudius calls Hamlet a fever in his blood (“like the hectic in my blood he rages”) and tells England, “thou must cure me.”","explain":"The letters order Hamlet’s “present death.” Hamlet later rewrites them so that Rosencrantz and Guildenstern are executed instead."},{"type":"order","ref":"Act 4","prompt":"Put these events from Act 4 in order.","items":["Claudius sends Hamlet to England.","Ophelia, driven mad by grief, sings strange songs to the Queen.","Laertes storms the castle demanding revenge for his father.","Horatio receives Hamlet’s letter about the pirates.","Gertrude reports that Ophelia has drowned."],"hint":"Hamlet leaves first. The act ends with the saddest news of all.","explain":"Hamlet is shipped off (4.3–4.4). In 4.5 Ophelia first appears mad before the Queen, and then Laertes bursts in (she returns with her flowers after). Hamlet’s pirate letter arrives in 4.6, and Gertrude reports the drowning at the end of 4.7."},{"type":"choice","ref":"4.7","prompt":"How do Claudius and Laertes plan to kill Hamlet?","options":["A “friendly” fencing match with an unblunted, poisoned sword, plus a poisoned cup as backup.","An ambush by pirates on his way back from England.","Poison in his ear while he sleeps, as Claudius killed King Hamlet.","A trial for Polonius’s murder that ends in execution."],"answer":0,"hint":"Laertes is known for his skill with a rapier.","explain":"Claudius proposes the fencing match. Laertes adds poison to his sword tip, and Claudius prepares a poisoned drink in case Hamlet survives."}],"door":{"ref":"4.5","prompt":"Ophelia hands out flowers: “There’s _______, that’s for remembrance.”","answers":["rosemary"],"hint":"It is an herb, and its name contains a flower and a name.","explain":"Rosemary for remembrance, and pansies for thoughts. Each flower carries a meaning, and many editors suggest she hands them to particular people in the court."}},{"act":"V","name":"The Graveyard & the Duel","tagline":"The readiness is all.","puzzles":[{"type":"choice","ref":"5.1","prompt":"“Alas, poor Yorick! I knew him, Horatio.” Who was Yorick?","options":["The late king’s jester, who carried Hamlet on his back when Hamlet was a child.","A gravedigger who once worked at the castle.","Hamlet’s old fencing teacher.","A soldier who died fighting Norway."],"answer":0,"hint":"Hamlet remembers his jokes and songs.","explain":"Yorick was the king’s jester, “a fellow of infinite jest.” Holding his skull, Hamlet reflects that death reduces everyone to dust, from jesters to Alexander the Great."},{"type":"choice","ref":"5.2","prompt":"“There’s a divinity that shapes our ends, / Rough-hew them how we will.” What shift in Hamlet does this line show?","options":["He now trusts that a higher power (providence) guides events, whatever his own plans.","He has decided to become a priest.","He believes he can control his fate through careful planning.","He blames Horatio for the way events have turned out."],"answer":0,"hint":"To rough-hew is to shape something crudely. Who finishes the shaping?","explain":"Hamlet has grown calmer and more accepting. People can roughly shape their lives, but a divine power finishes the shape. Later he says, “The readiness is all.”"},{"type":"order","ref":"5.2","prompt":"Put the events of the final duel in order.","items":["Gertrude drinks from the poisoned cup.","Hamlet and Laertes wound each other with the poisoned sword.","Laertes confesses: “The King, the King’s to blame.”","Hamlet kills Claudius.","Fortinbras arrives to find the royal family dead."],"hint":"The Queen drinks during the match; Fortinbras enters only after the last deaths.","explain":"Gertrude drinks a toast to Hamlet. The swords are exchanged in a scuffle and both men are wounded. Dying, Laertes reveals the plot, and Hamlet finally kills Claudius. Fortinbras arrives to claim Denmark."},{"type":"speaker","ref":"5.2","quote":"Now cracks a noble heart. Good night, sweet prince, / And flights of angels sing thee to thy rest!","options":["Horatio","Fortinbras","Laertes","Osric"],"answer":"Horatio","hint":"Hamlet has asked this loyal friend to live on and tell his story.","explain":"Horatio, Hamlet’s loyal friend, speaks this farewell. Hamlet asked him to live on and tell his story truthfully."}],"door":{"ref":"5.2","prompt":"Hamlet’s final words: “The rest is _______.”","answers":["silence"],"hint":"It is the opposite of speech.","explain":"“The rest is silence.” The prince who could not stop talking and thinking falls silent at last."}}];
+const SEED_A = 1592595969, SEED_B = 253655637;
+const KEY = 'elsinore-escape-v1';
+const CAST = [['Hamlet','Prince of Denmark, son of the late King Hamlet'],['Claudius','King of Denmark, Hamlet’s uncle and stepfather'],['Gertrude','Queen of Denmark, Hamlet’s mother'],['The Ghost','The spirit of Hamlet’s father'],['Polonius','Chief counselor to the King'],['Ophelia','Polonius’s daughter'],['Laertes','Polonius’s son'],['Horatio','Hamlet’s loyal friend'],['Rosencrantz & Guildenstern','Hamlet’s school friends'],['Marcellus & Bernardo','Guards on the battlements'],['Fortinbras','Prince of Norway'],['Osric','A foolish courtier'],['Yorick','The late King’s jester (a skull)'],['The Players','Traveling actors']];
+const app = document.getElementById('app');
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function load(){ try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+function fresh(name){ return { v:1, name, started: Date.now(), active: 0, chamber: 0, step: 0, mistakes: 0, hints: 0, hinted: {}, wrong: {}, order: {}, solvedIds: {}, done: false, cert: null }; }
+let S = load(); let view = S && S.done ? 'cert' : (S ? 'resume' : 'intro'); let ui = {};
+// active-time clock
+setInterval(() => { if (S && !S.done && document.visibilityState === 'visible' && (view === 'map' || view === 'puzzle' || view === 'clear')) { S.active += 1000; if ((S.active / 1000) % 5 === 0) save(); } }, 1000);
+function rng(seed){ let s = seed >>> 0; return () => { s += 0x6D2B79F5; let v = s; v = Math.imul(v ^ (v >>> 15), v | 1); v ^= v + Math.imul(v ^ (v >>> 7), v | 61); return ((v ^ (v >>> 14)) >>> 0) / 4294967296; }; }
+function shuffle(a, seed){ const r = rng(seed), c = a.slice(); for (let i = c.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [c[i], c[j]] = [c[j], c[i]]; } return c; }
+function seedOf(c, s){ let h = 2166136261; for (const ch of (S ? S.name : '') + c + ':' + s) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619) >>> 0; } return h; }
+const pid = () => S.chamber + '-' + S.step;
+function norm(s){ return String(s).toLowerCase().replace(/[’']/g, '').replace(/[^a-z ]/g, ' ').replace(/\s+/g, ' ').trim(); }
+function h32(str, seed){ let h = seed >>> 0; for (const ch of str) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619) >>> 0; } h ^= h >>> 13; h = Math.imul(h, 0x5bd1e995) >>> 0; h ^= h >>> 15; return h >>> 0; }
+const ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function enc(n){ let s = ''; for (let i = 0; i < 4; i++) { s += ALPHA[n & 31]; n >>>= 5; } return s; }
+function makeCode(name, date, mins, mistakes, hints){ const p = [norm(name), date, mins, mistakes, hints, 'EE1'].join('|'); return 'EE-' + enc(h32(p, SEED_A)) + '-' + enc(h32(p, SEED_B)); }
+const pad = n => String(n).padStart(2, '0');
+function stamp(d){ return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function topbar(){ if (!S) return ''; return `<div class="panel topbar"><div class="brand">Elsinore <b>Escape</b></div><div class="stats"><span class="chip">Student <strong>${esc(S.name)}</strong></span><span class="chip">Mistakes <strong>${S.mistakes}</strong></span><span class="chip">Hints <strong>${S.hints}</strong></span><button class="btn ghost small" data-act="cast">Cast list</button></div></div>`; }
+function render(){ ({ intro, resume, map, puzzle, clear, cert })[view](); const f = app.querySelector('[autofocus],.focus-me'); if (f) f.focus(); }
+function intro(){
+  app.innerHTML = `<section class="panel title"><div class="kicker">A Hamlet Escape Room</div><h1>Elsinore Escape</h1><p class="sub">Five chambers. Five acts. Something is rotten in the state of Denmark, and only you can find the way out.</p><div class="ornament">&#10022;</div>
+  <div class="rules"><div class="rule"><b>Five chambers</b>Each act of the play is a locked chamber with four puzzles and a sealed door.</div><div class="rule"><b>Every clue counts</b>Wrong answers add to your mistake count. Hints are there when you need them, but they are counted too.</div><div class="rule"><b>Earn your certificate</b>Escape all five chambers to receive a completion certificate to submit for your assignment.</div></div>
+  <label class="field" for="name">Your first and last name<input class="text" id="name" autocomplete="name" maxlength="60" placeholder="e.g., Maya Johnson" autofocus></label>
+  <p class="err" id="err"></p><div class="row"><button class="btn" data-act="begin">Enter Elsinore</button></div>
+  <p style="margin:16px 0 0;color:var(--muted);font-size:.85rem">Your progress saves on this device, so you can close the tab and come back later on the same computer.</p></section>`;
+}
+function resume(){
+  app.innerHTML = `<section class="panel title"><div class="kicker">Welcome back</div><h1>Elsinore Escape</h1><p class="sub">${esc(S.name)}, you have cleared ${S.chamber} of 5 chambers.</p><div class="ornament">&#10022;</div><div class="row"><button class="btn focus-me" data-act="continue">Continue</button><button class="btn ghost" data-act="restart-ask">Start over</button></div>${ui.confirmRestart ? `<p class="err">Starting over erases your progress, mistakes, and hints. <button class="btn ghost small" data-act="restart">Yes, start over</button></p>` : ''}</section>`;
+}
+function map(){
+  const rooms = CHAMBERS.map((c, i) => { const st = i < S.chamber ? 'done' : i === S.chamber ? 'current' : 'locked'; const label = st === 'done' ? 'Escaped' : st === 'current' ? (S.step ? `In progress · ${S.step}/5` : 'Unlocked') : 'Sealed';
+    return `<div class="panel room ${st}"><div class="seal">${st === 'done' ? '&#128273;' : esc(c.act)}</div><div><div class="status">Act ${esc(c.act)} · ${label}</div><h3>${esc(c.name)}</h3><p>${esc(c.tagline)}</p></div>${st === 'current' ? `<button class="btn go focus-me" data-act="enter">Enter</button>` : ''}</div>`; }).join('');
+  app.innerHTML = topbar() + `<section class="panel maphead"><h2>The Castle of Elsinore</h2><p>Escape each chamber in order. The next door opens only when the last one is solved.</p></section><div class="path">${rooms}</div>`;
+}
+function pips(){ return '<div class="pips" aria-label="Progress in this chamber">' + [0,1,2,3,4].map(i => `<span class="pip ${i < S.step ? 'on' : i === S.step ? 'now' : ''}"></span>`).join('') + '</div>'; }
+function current(){ const c = CHAMBERS[S.chamber]; return S.step < 4 ? c.puzzles[S.step] : Object.assign({ type: 'door' }, c.door); }
+const TYPE_LABEL = { speaker: 'Who said it?', choice: 'Question', order: 'Put it in order', door: 'The sealed door' };
+function puzzle(){
+  const c = CHAMBERS[S.chamber], p = current(), id = pid(), wrong = S.wrong[id] || [], solved = !!(S.solvedIds && S.solvedIds[id]);
+  let body = '';
+  if (p.type === 'speaker') {
+    body = `<blockquote class="quote">“${esc(p.quote.replace(/ \/ /g, '\n'))}”</blockquote><div class="opts cast">` + shuffle(p.options, seedOf(S.chamber, S.step)).map(o => { const isW = wrong.includes(o), isR = solved && o === p.answer; return `<button class="opt ${isW ? 'wrong' : ''} ${isR ? 'right' : ''}" data-act="pick" data-v="${esc(o)}" ${isW || solved ? 'disabled' : ''}><span class="mono">${esc(o[0])}</span>${esc(o)}</button>`; }).join('') + '</div>';
+  } else if (p.type === 'choice') {
+    const order = shuffle(p.options.map((o, i) => i), seedOf(S.chamber, S.step));
+    body = `<p class="prompt">${esc(p.prompt)}</p><div class="opts">` + order.map((i, n) => { const isW = wrong.includes(i), isR = solved && i === p.answer; return `<button class="opt ${isW ? 'wrong' : ''} ${isR ? 'right' : ''}" data-act="pick" data-v="${i}" ${isW || solved ? 'disabled' : ''}><span class="k">${'ABCD'[n]}</span><span>${esc(p.options[i])}</span></button>`; }).join('') + '</div>';
+  } else if (p.type === 'order') {
+    const placed = S.order[id] || []; const pool = shuffle(p.items.map((t, i) => i), seedOf(S.chamber, S.step)).filter(i => !placed.includes(i));
+    body = `<p class="prompt">${esc(p.prompt)}</p><div class="order-slots">` + p.items.map((_, n) => { const i = placed[n]; return i === undefined ? `<div class="slot"><span class="n">${n + 1}</span><span>${n === placed.length ? 'Choose the next event below' : ''}</span></div>` : `<button class="slot filled" data-act="unplace" data-n="${n}" ${solved ? 'disabled' : ''} aria-label="Remove ${esc(p.items[i])}"><span class="n">${n + 1}</span><span>${esc(p.items[i])}</span></button>`; }).join('') + '</div>' +
+      (solved ? '' : `${pool.length ? '<div class="pool-label">Tap in order</div>' : ''}<div class="pool">` + pool.map(i => `<button class="opt" data-act="place" data-i="${i}">${esc(p.items[i])}</button>`).join('') + `</div><div class="row"><button class="btn" data-act="check-order" ${placed.length < p.items.length ? 'disabled' : ''}>Check order</button>${placed.length ? '<button class="btn ghost" data-act="clear-order">Clear</button>' : ''}</div>`) + (ui.orderMsg ? `<p class="err">${esc(ui.orderMsg)}</p>` : '');
+  } else {
+    body = `<div class="door"><div class="doorart ${solved ? 'open' : ''}" aria-hidden="true"></div><div><p class="prompt">${esc(p.prompt)}</p>${solved ? '' : `<label class="field" for="pw" style="margin:0">Speak the password<input class="text" id="pw" autocomplete="off" spellcheck="false" autofocus></label><div class="row" style="justify-content:flex-start"><button class="btn" data-act="unlock">Unlock the door</button></div><p class="err" id="err" style="text-align:left">${esc(ui.doorMsg || '')}</p>`}</div></div>`;
+  }
+  const hint = S.hinted[id] ? `<div class="hintbox"><b>Hint:</b> ${esc(p.hint)}</div>` : '';
+  const fb = solved ? `<div class="feedback"><b>${p.type === 'door' ? 'The door swings open.' : 'Correct!'}</b><p>${esc(p.explain)}</p></div><div class="row"><button class="btn focus-me" data-act="next">${p.type === 'door' ? 'Leave the chamber' : 'Next puzzle'}</button></div>` : '';
+  app.innerHTML = topbar() + `<section class="panel"><div class="phead"><div><div class="act">Act ${esc(c.act)}</div><h2>${esc(c.name)}</h2></div>${pips()}</div><div class="pbody" id="pbody"><div class="ptype">${S.step < 4 ? `Puzzle ${S.step + 1} of 4` : 'Final lock'} · <span>${TYPE_LABEL[p.type]}</span></div>${body}${hint}${fb}${solved ? '' : `<div class="tools"><button class="btn ghost small" data-act="hint" ${S.hinted[id] ? 'disabled' : ''}>${S.hinted[id] ? 'Hint shown' : 'Show a hint'}</button><button class="btn ghost small" data-act="map">Castle map</button></div>`}<div class="ref" style="margin-top:12px">Hamlet ${esc(p.ref)}</div></div></section>`;
+}
+function clear(){
+  const c = CHAMBERS[S.chamber - 1]; const last = S.chamber >= CHAMBERS.length;
+  app.innerHTML = topbar() + `<section class="panel clear"><div class="key" aria-hidden="true">&#128273;</div><h2>Chamber ${S.chamber} of 5 escaped</h2><p>You have escaped <b>${esc(c.name)}</b> (Act ${esc(c.act)}). ${last ? 'Only one thing remains: claim your certificate.' : 'The next chamber awaits.'}</p><div class="row"><button class="btn focus-me" data-act="${last ? 'finish' : 'map'}">${last ? 'Claim your certificate' : 'Return to the castle map'}</button></div></section>`;
+}
+function certText(){ const c = S.cert; return ['ELSINORE ESCAPE: CERTIFICATE OF COMPLETION', 'Hamlet escape room (Acts I-V)', 'Student: ' + S.name, 'Completed: ' + c.date + ' ' + c.time, 'Chambers escaped: 5 / 5', 'Time: ' + c.mins + ' min', 'Mistakes: ' + S.mistakes, 'Hints used: ' + S.hints, 'Code: ' + c.code].join('\n'); }
+function cert(){
+  const c = S.cert;
+  app.innerHTML = `<section class="panel cert"><div class="kicker" style="color:var(--ghost);font-size:.74rem;font-weight:800;letter-spacing:.3em;text-transform:uppercase">You escaped Elsinore</div><h2 style="font-size:2.3rem;color:var(--gold-soft);margin-top:6px">“The rest is silence.”</h2>
+  <div class="parch"><div class="ct">Certificate of Completion</div><h2>Elsinore Escape</h2><div>This certifies that</div><div class="who">${esc(S.name)}</div><div>escaped all five chambers of Hamlet</div><dl><dt>Completed</dt><dd>${esc(c.date)} at ${esc(c.time)}</dd><dt>Time</dt><dd>${c.mins} minute${c.mins === 1 ? '' : 's'}</dd><dt>Mistakes</dt><dd>${S.mistakes}</dd><dt>Hints used</dt><dd>${S.hints}</dd></dl><div class="code">${esc(c.code)}</div></div>
+  <ol class="steps"><li>Click <b>Copy certificate</b>.</li><li>Open the assignment's text box, paste, and click <b>Submit</b>.</li><li>Keep this tab open until your submission goes through.</li></ol>
+  <div class="row"><button class="btn focus-me" data-act="copy">Copy certificate</button></div><p class="err" id="copymsg" style="color:var(--good)"></p>
+  <textarea class="certtext" id="certtext" readonly aria-label="Certificate text">${esc(certText())}</textarea>
+  <p style="margin:14px 0 0;color:var(--muted);font-size:.85rem">If the button doesn't work, select all the text in the box above and copy it.</p>
+  <div class="row"><button class="btn ghost small" data-act="restart-ask">Play again</button></div>${ui.confirmRestart ? `<p class="err">Playing again erases this certificate on this device, so copy it first. <button class="btn ghost small" data-act="restart">Yes, erase and replay</button></p>` : ''}</section>`;
+}
+function castModal(){ const m = document.createElement('div'); m.className = 'modal'; m.innerHTML = `<div class="panel" role="dialog" aria-modal="true" aria-label="Cast list"><h2 style="color:var(--gold-soft);font-size:1.6rem">Dramatis Personae</h2><div class="cast-list">${CAST.map(([n, d]) => `<div><b>${esc(n)}</b><br>${esc(d)}</div>`).join('')}</div><div class="row"><button class="btn" data-act="close-cast">Close</button></div></div>`; document.body.append(m); m.querySelector('button').focus(); }
+function miss(){ S.mistakes++; save(); }
+function solve(){ (S.solvedIds = S.solvedIds || {})[pid()] = true; save(); render(); }
+function act(a, el){
+  const p = S && view === 'puzzle' ? current() : null, id = S ? pid() : '';
+  switch (a) {
+    case 'begin': { const v = document.getElementById('name').value.trim().replace(/\s+/g, ' '); if (!/^\S+\s+\S+/.test(v) || v.length < 4) { document.getElementById('err').textContent = 'Please enter your first and last name exactly as your teacher knows it.'; return; } S = fresh(v); save(); view = 'map'; ui = {}; break; }
+    case 'continue': view = 'map'; ui = {}; break;
+    case 'restart-ask': ui.confirmRestart = true; break;
+    case 'restart': try { localStorage.removeItem(KEY); } catch (e) {} S = null; view = 'intro'; ui = {}; break;
+    case 'cast': castModal(); return;
+    case 'close-cast': document.querySelector('.modal')?.remove(); return;
+    case 'enter': view = 'puzzle'; ui = {}; break;
+    case 'map': view = 'map'; ui = {}; break;
+    case 'hint': if (!S.hinted[id]) { S.hinted[id] = true; S.hints++; save(); } break;
+    case 'pick': { const v = p.type === 'choice' ? Number(el.dataset.v) : el.dataset.v; if (v === p.answer) { solve(); return; } (S.wrong[id] = S.wrong[id] || []).push(v); miss(); render(); document.getElementById('pbody')?.classList.add('shake'); return; }
+    case 'place': { (S.order[id] = S.order[id] || []).push(Number(el.dataset.i)); ui.orderMsg = ''; save(); break; }
+    case 'unplace': { S.order[id].splice(Number(el.dataset.n), 1); ui.orderMsg = ''; save(); break; }
+    case 'clear-order': S.order[id] = []; ui.orderMsg = ''; save(); break;
+    case 'check-order': { const placed = S.order[id] || []; const right = placed.filter((v, n) => v === n).length; if (right === p.items.length) { solve(); return; } miss(); ui.orderMsg = `Not quite: ${right} of ${p.items.length} are in the right place. Tap an item to remove it and try again.`; render(); document.getElementById('pbody')?.classList.add('shake'); return; }
+    case 'unlock': { const art = x => norm(x).replace(/^(the|a|an) /, ''); const v = art(document.getElementById('pw').value); if (!v) return; if (p.answers.map(art).includes(v)) { solve(); return; } miss(); ui.doorMsg = 'The door does not move. Check the line in the play and try again.'; render(); document.getElementById('pbody')?.classList.add('shake'); return; }
+    case 'next': { ui = {}; if (S.step < 4) { S.step++; } else { S.chamber++; S.step = 0; view = 'clear'; } save(); break; }
+    case 'finish': { const d = new Date(); const mins = Math.max(1, Math.round(S.active / 60000)); S.done = true; S.cert = { date: stamp(d), time: pad(d.getHours()) + ':' + pad(d.getMinutes()), mins, code: '' }; S.cert.code = makeCode(S.name, S.cert.date, mins, S.mistakes, S.hints); save(); view = 'cert'; ui = {}; break; }
+    case 'copy': { const t = certText(), msg = document.getElementById('copymsg'); const fallback = () => { const ta = document.getElementById('certtext'); ta.focus(); ta.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (e) {} msg.textContent = ok ? 'Copied! Now paste it into the assignment.' : 'Select the text in the box below and copy it (Ctrl+C or Cmd+C).'; }; if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(() => { msg.textContent = 'Copied! Now paste it into the assignment.'; }, fallback); else fallback(); return; }
+    default: return;
+  }
+  render();
+}
+app.addEventListener('click', e => { const b = e.target.closest('[data-act]'); if (b && !b.disabled) act(b.dataset.act, b); });
+document.addEventListener('click', e => { const b = e.target.closest('.modal [data-act]'); if (b) act(b.dataset.act, b); else if (e.target.classList?.contains('modal')) e.target.remove(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelector('.modal')?.remove(); if (e.key === 'Enter') { if (e.target.id === 'name') act('begin'); if (e.target.id === 'pw') act('unlock'); } });
+document.addEventListener('visibilitychange', () => { if (S) save(); });
+render();
+})();
+</script>
+</body>
+</html>

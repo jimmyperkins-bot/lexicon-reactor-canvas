@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elsinore Escape: Certificate Checker</title>
+<style>
+:root{--bg:#0b1020;--panel:#161c30;--line:#3a4263;--gold:#d8b56a;--text:#ece6d6;--muted:#a9a6b8;--good:#6fd39a;--bad:#ff7a7a}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at top,#1d2645,var(--bg) 70%);color:var(--text);font:16px/1.5 Georgia,"Times New Roman",serif;min-height:100vh;padding:24px 16px}
+.wrap{max-width:980px;margin:0 auto}
+h1{color:var(--gold);margin:0 0 4px;font-size:2rem}
+p{margin:0 0 12px;color:var(--muted)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:16px}
+textarea{width:100%;min-height:220px;background:#0d1224;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:12px;font:14px/1.45 ui-monospace,Menlo,Consolas,monospace}
+button{background:linear-gradient(#e6c47c,#b88f43);color:#1c1508;border:0;border-radius:999px;padding:10px 20px;font:700 15px Georgia,serif;cursor:pointer;margin-right:8px}
+button.ghost{background:transparent;color:var(--gold);border:1px solid var(--gold)}
+.summary{font-weight:700;color:var(--text);margin-bottom:10px}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--gold);font-weight:700}
+.ok{color:var(--good);font-weight:700}.no{color:var(--bad);font-weight:700}
+.note{white-space:normal;color:var(--muted);font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Elsinore Escape: Certificate Checker</h1>
+<p>Teacher tool. Paste one or more student certificates below (for example, copied from SpeedGrader) and click Check. A certificate is valid only if its code matches the student's name, date, time, mistakes, and hints exactly. If any detail was edited, or a code was copied from someone else, it will show as invalid.</p>
+<div class="panel">
+<textarea id="in" placeholder="Paste certificates here. You can paste many at once."></textarea>
+<div style="margin-top:12px"><button id="go">Check</button><button class="ghost" id="clr">Clear</button></div>
+</div>
+<div class="panel" id="out" hidden></div>
+</div>
+<script>
+(function(){
+'use strict';
+const SEED_A = /*SEED_A*/0, SEED_B = /*SEED_B*/0;
+function norm(s){ return String(s).toLowerCase().replace(/[’']/g, '').replace(/[^a-z ]/g, ' ').replace(/\s+/g, ' ').trim(); }
+function h32(str, seed){ let h = seed >>> 0; for (const ch of str) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619) >>> 0; } h ^= h >>> 13; h = Math.imul(h, 0x5bd1e995) >>> 0; h ^= h >>> 15; return h >>> 0; }
+const ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function enc(n){ let s = ''; for (let i = 0; i < 4; i++) { s += ALPHA[n & 31]; n >>>= 5; } return s; }
+function makeCode(name, date, mins, mistakes, hints){ const p = [norm(name), date, mins, mistakes, hints, 'EE1'].join('|'); return 'EE-' + enc(h32(p, SEED_A)) + '-' + enc(h32(p, SEED_B)); }
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function field(block, label){ const m = block.match(new RegExp('^\\s*' + label + '\\s*:\\s*(.+?)\\s*$', 'im')); return m ? m[1] : null; }
+function check(){
+  const raw = document.getElementById('in').value;
+  const blocks = raw.split(/ELSINORE ESCAPE\s*:?\s*CERTIFICATE OF COMPLETION/i).slice(1);
+  const out = document.getElementById('out'); out.hidden = false;
+  if (!blocks.length) { out.innerHTML = '<p class="no">No certificates found. Make sure the paste includes the line "ELSINORE ESCAPE: CERTIFICATE OF COMPLETION".</p>'; return; }
+  const seen = {}; let good = 0;
+  const rows = blocks.map(b => {
+    const name = field(b, 'Student'), comp = field(b, 'Completed'), time = field(b, 'Time'), mis = field(b, 'Mistakes'), hin = field(b, 'Hints used'), code = (field(b, 'Code') || '').toUpperCase().replace(/\s+/g, '');
+    const date = comp ? comp.split(/\s+/)[0] : null, mins = time ? (time.match(/\d+/) || [null])[0] : null;
+    let ok = false, note = '';
+    if (!name || !date || mins === null || mis === null || hin === null || !code) note = 'Missing lines. Ask the student to paste the whole certificate.';
+    else { ok = makeCode(name, date, Number(mins), Number(mis), Number(hin)) === code; if (!ok) note = 'Code does not match these details.'; }
+    if (code) { if (seen[code]) note = (note ? note + ' ' : '') + 'Same code as ' + seen[code] + '.'; else seen[code] = name || 'another entry'; }
+    if (ok) good++;
+    return `<tr><td>${esc(name || '?')}</td><td>${esc(comp || '?')}</td><td>${esc(mins ?? '?')} min</td><td>${esc(mis ?? '?')}</td><td>${esc(hin ?? '?')}</td><td>${esc(code || '?')}</td><td class="${ok ? 'ok' : 'no'}">${ok ? 'Valid' : 'Invalid'}</td><td class="note">${esc(note)}</td></tr>`;
+  });
+  out.innerHTML = `<div class="summary">${good} of ${blocks.length} certificate${blocks.length === 1 ? '' : 's'} valid</div><div class="tablewrap"><table><thead><tr><th>Student</th><th>Completed</th><th>Time</th><th>Mistakes</th><th>Hints</th><th>Code</th><th>Result</th><th></th></tr></thead><tbody>${rows.join('')}</tbody></table></div>`;
+}
+document.getElementById('go').addEventListener('click', check);
+document.getElementById('clr').addEventListener('click', () => { document.getElementById('in').value = ''; document.getElementById('out').hidden = true; });
+})();
+</script>
+</body>
+</html>
