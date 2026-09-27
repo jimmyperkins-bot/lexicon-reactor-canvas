@@ -6,8 +6,8 @@ The distributed game is intentionally a pure HTML and CSS document. It contains 
 
 State is represented with native form controls:
 
-- radio buttons select English 3 or English 4;
-- radio buttons select missions A through D;
+- radio buttons select English 3, English 4, or SAT Prep;
+- radio buttons select missions A through D (English) or 01 through 10 (SAT Prep); each course shows only its own mission row;
 - checkboxes track mission start, question progression, correct answers, and shield strikes;
 - labels provide the clickable controls;
 - CSS selectors, including `:checked` and `:has()`, reveal the correct question, feedback, shield state, win state, or loss state;
@@ -17,15 +17,15 @@ This design works in Canvas iframes that do not permit application JavaScript.
 
 ## Build-time code
 
-Node.js is used only during development. `scripts/build-reactor.mjs` reads curriculum data and question-generation helpers from `src/game-engine.js`, creates eight mission decks, and writes one generated HTML file.
+Node.js is used only during development. `scripts/build-reactor.mjs` reads English curriculum data from `src/game-engine.js` and SAT data from `src/sat-vocabulary.js` and `data/sat-words-in-context.json`, creates eighteen mission decks, and writes one generated HTML file.
 
 The generated build contains:
 
-- two grade paths;
-- four missions per grade;
+- three course paths (English 3, English 4, SAT Prep);
+- four missions per English course and ten SAT Prep missions;
 - ten questions per mission;
 - three shield states;
-- eighty generated question cards;
+- 180 generated question cards;
 - responsive and reduced-motion CSS;
 - explicit stable-reactor and reactor-breach endings.
 
@@ -36,6 +36,8 @@ Mission rotation and distractor selection use seeded pseudo-random generators. T
 ## Testing
 
 `test/game-engine.test.js` validates the 29 curriculum entries and question generation.
+
+`test/sat-vocabulary.test.js` validates the SAT word data, the ten SAT missions, that every question has exactly one correct answer, and that distractors share the answer's part of speech but never its meaning family.
 
 `test/pure-html.test.mjs` performs two real builds:
 

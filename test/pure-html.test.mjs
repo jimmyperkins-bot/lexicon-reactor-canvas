@@ -28,6 +28,13 @@ try {
   assert.match(portableHtml, /src="\.\.\/assets\/reactor-device\.png"/i, 'portable build must use the bundled reactor asset');
   assert.match(portableHtml, /id="grade-3"[^>]*type="radio"/i, 'English 3 selector is required');
   assert.match(portableHtml, /id="grade-4"[^>]*type="radio"/i, 'English 4 selector is required');
+  assert.match(portableHtml, /id="grade-sat"[^>]*type="radio"/i, 'SAT Prep selector is required');
+  for (let mission = 1; mission <= 10; mission += 1) {
+    const label = String(mission).padStart(2, '0');
+    assert.match(portableHtml, new RegExp(`id="start-sat-${label}"`), `SAT mission ${label} start control is required`);
+  }
+  assert.doesNotMatch(portableHtml, /\son[a-z]+\s*=/i, 'published game must not contain inline event handlers');
+  assert.doesNotMatch(portableHtml, /javascript:/i, 'published game must not contain javascript: URLs');
   assert.match(portableHtml, /Reactor Stable/i, 'win state is required');
   assert.match(portableHtml, /Reactor Breach/i, 'loss state is required');
 
@@ -38,8 +45,9 @@ try {
 
   assert.ok(canvasHtml.includes(chamberUrl), 'Canvas build must use the supplied chamber URL');
   assert.ok(canvasHtml.includes(reactorUrl), 'Canvas build must use the supplied reactor URL');
-  assert.equal((canvasHtml.match(/<section class="mission-deck"/g) || []).length, 8, 'eight mission decks are required');
-  assert.equal((canvasHtml.match(/<fieldset class="question-card"/g) || []).length, 80, 'each mission must contain ten questions');
+  assert.equal((canvasHtml.match(/<section class="mission-deck"/g) || []).length, 18, 'eighteen mission decks are required (4 + 4 English, 10 SAT Prep)');
+  assert.equal((canvasHtml.match(/<fieldset class="question-card"/g) || []).length, 180, 'each mission must contain ten questions');
+  assert.equal((canvasHtml.match(/<section class="mission-deck" data-grade="sat"/g) || []).length, 10, 'SAT Prep must have ten missions');
 
   console.log('PASS: portable and Canvas pure-HTML builds');
 } finally {

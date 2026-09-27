@@ -2,26 +2,32 @@
 
 ![Lexicon Reactor icon](assets/icons/lexicon-reactor-icon.png)
 
-Lexicon Reactor is a vocabulary mission game for English 3 and English 4. The published game runs as pure HTML and CSS inside a Canvas LMS iframe—there is no runtime JavaScript, framework, CDN, or external font dependency.
+Lexicon Reactor is a vocabulary mission game for English 3, English 4, and SAT Prep. The published game runs as pure HTML and CSS inside a Canvas LMS iframe—there is no runtime JavaScript, framework, CDN, or external font dependency.
 
-Students choose a grade and one of four ten-word missions. They stabilize the reactor by answering all ten signals before three incorrect answers breach the shields.
+Students choose a course and a ten-signal mission (four missions each for English 3 and English 4, ten for SAT Prep). They stabilize the reactor by answering all ten signals before three incorrect answers breach the shields.
 
 ## Included
 
 - `dist/lexicon-reactor.html` — ready-to-preview portable build
 - `src/game-engine.js` — 29 curriculum terms and deterministic question generation
+- `src/sat-vocabulary.js` — 80 curated SAT words, the ten SAT missions, and the mixed-question generator
+- `data/sat-word-bank.tsv` — the full 1,625-word SAT bank (65 lessons × 25 words) for future missions
+- `data/sat-words-in-context.json` — 54 Digital SAT Words in Context practice items
 - `scripts/build-reactor.mjs` — build-time generator for the pure-HTML game
 - `assets/` — chamber background, reactor artwork, and Canvas homepage icons
 - `test/` — vocabulary-engine and published-output contract tests
 - `docs/CANVAS_INSTALL.md` — complete Canvas installation instructions
 - `docs/CUSTOMIZATION.md` — vocabulary, mission, style, and asset customization
 - `docs/ARCHITECTURE.md` — explanation of the no-JavaScript runtime design
+- `docs/SAT_PREP.md` — SAT Prep sources, mission map, and how to add more SAT missions
 
 ## Game design
 
 - English 3: 16 curriculum terms
 - English 4: 13 curriculum terms
-- Four missions per grade
+- Four missions per English course; ten SAT Prep missions
+- SAT Prep: 80 most-tested SAT words (Missions 01–08) plus 20 Digital SAT Words in Context passages (Missions 09–10)
+- SAT question types rotate: definition → word, fill in the blank, synonym, antonym, and word → definition
 - Ten signals per mission
 - Three shields per attempt
 - A clear win state and a clear reactor-breach loss state

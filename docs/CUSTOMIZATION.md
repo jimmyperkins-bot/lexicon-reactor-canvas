@@ -24,6 +24,10 @@ npm test
 
 The tests confirm that every curriculum term appears in the mission rotation for its grade.
 
+## SAT Prep
+
+See `docs/SAT_PREP.md` for the SAT word data format, mission map, and how to build new SAT missions from the full 1,625-word bank.
+
 ## Missions
 
 Mission names and labels are defined by `MISSIONS` near the top of `scripts/build-reactor.mjs`. Each grade currently has four deterministic missions with ten signals each.

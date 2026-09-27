@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const { VOCABULARY, createQuestion } = require('../src/game-engine.js');
+const { SAT_MISSIONS, buildSatDecks } = require('../src/sat-vocabulary.js');
+const { items: WORDS_IN_CONTEXT } = require('../data/sat-words-in-context.json');
 
 const { values } = parseArgs({
   options: {
@@ -22,6 +24,11 @@ const MISSIONS = [
   { key: 'b', label: 'B', name: 'Pulse' },
   { key: 'c', label: 'C', name: 'Flux' },
   { key: 'd', label: 'D', name: 'Nova' }
+];
+const COURSES = [
+  { grade: '3', name: 'English 3', note: 'American Literature', missions: MISSIONS },
+  { grade: '4', name: 'English 4', note: 'British Literature', missions: MISSIONS },
+  { grade: 'sat', name: 'SAT Prep', note: '10 missions', missions: SAT_MISSIONS }
 ];
 
 function seededRandom(seed) {
@@ -63,12 +70,40 @@ function buildDecks(grade) {
   return MISSIONS.map((mission, missionIndex) => {
     const entries = Array.from({ length: 10 }, (_, index) => ring[(offsets[missionIndex] + index) % ring.length]);
     const questionRandom = seededRandom(38000 + Number(grade) * 100 + missionIndex);
-    const questions = entries.map((entry, index) => createQuestion(pool, index + 1, questionRandom, entry));
+    const questions = entries.map((entry, index) => {
+      const question = createQuestion(pool, index + 1, questionRandom, entry);
+      return {
+        overload: question.overload,
+        answerTerm: question.target.term,
+        detail: `${course} · ${question.target.units.map((unit) => `Unit ${unit}`).join(' · ')}`,
+        instruction: question.overload ? 'Match the term to its exact definition' : 'Identify the vocabulary term',
+        prompt: question.prompt,
+        promptClass: question.overload ? 'prompt term-prompt' : 'prompt',
+        feedback: `${question.target.term} is correct.`,
+        options: question.options
+      };
+    });
     return { grade, course, mission, id: `e${grade}-${mission.key}`, questions };
   });
 }
 
-const decks = [...buildDecks('3'), ...buildDecks('4')];
+function buildSatPath() {
+  return buildSatDecks(WORDS_IN_CONTEXT).map(({ mission, questions }) => ({
+    grade: 'sat',
+    course: 'SAT Prep',
+    mission,
+    id: `sat-${mission.label}`,
+    questions: questions.map((question) => ({
+      ...question,
+      feedback: question.kind === 'context'
+        ? `“${question.answerTerm}” means ${question.options.find((option) => option.correct).value}.`
+        : `${question.answerTerm} is correct.`
+    }))
+  }));
+}
+
+const decks = [...buildDecks('3'), ...buildDecks('4'), ...buildSatPath()];
+const ALL_MISSIONS = [...MISSIONS, ...SAT_MISSIONS];
 
 function stateInputs(deck) {
   const steps = Array.from({ length: 9 }, (_, index) =>
@@ -108,22 +143,19 @@ function answerMarkup(deck, question, questionIndex) {
 function questionMarkup(deck, question, questionIndex) {
   const round = questionIndex + 1;
   const nextId = round === 10 ? `${deck.id}-complete` : `${deck.id}-step-${round + 1}`;
-  const instruction = question.overload ? 'Match the term to its exact definition' : 'Identify the vocabulary term';
-  const promptClass = question.overload ? 'prompt term-prompt' : 'prompt';
-  const units = question.target.units.map((unit) => `Unit ${unit}`).join(' · ');
-  return `          <fieldset class="question-card" data-deck="${deck.id}" data-grade="${deck.grade}" data-term="${escapeHtml(question.target.term)}" id="${deck.id}-q${round}">
+  return `          <fieldset class="question-card" data-deck="${deck.id}" data-grade="${deck.grade}" data-term="${escapeHtml(question.answerTerm)}" id="${deck.id}-q${round}">
             <legend class="state-control">Round ${round}</legend>
             <div class="card-top"><span class="signal">Signal ${String(round).padStart(2, '0')}</span><span class="round">Round ${round} / 10</span></div>
             <div class="progress-track" aria-hidden="true"><span style="width:${round * 10}%"></span></div>
-            <p class="unit-line">${deck.course} · ${units}</p>
-            <p class="instruction">${instruction}</p>
-            <p class="${promptClass}">${escapeHtml(question.prompt)}</p>
+            <p class="unit-line">${escapeHtml(question.detail)}</p>
+            <p class="instruction">${escapeHtml(question.instruction)}</p>
+            <p class="${question.promptClass}">${escapeHtml(question.prompt)}</p>
             <div class="answer-list">
 ${answerMarkup(deck, question, questionIndex)}
             </div>
             <p class="damage-readout damage-one"><strong>Reactor hit!</strong> Two shields remain. Re-read the signal and try again.</p>
             <p class="damage-readout damage-two"><strong>Critical damage!</strong> One shield remains. The next miss ends the mission.</p>
-            <div class="feedback correct-feedback"><span><strong>Signal locked.</strong> ${escapeHtml(question.target.term)} is correct.</span><label class="next-control" for="${nextId}" tabindex="0">${round === 10 ? 'Stabilize Core' : 'Next Signal'} <span aria-hidden="true">→</span></label></div>
+            <div class="feedback correct-feedback"><span><strong>Signal locked.</strong> ${escapeHtml(question.feedback)}</span><label class="next-control" for="${nextId}" tabindex="0">${round === 10 ? 'Stabilize Core' : 'Next Signal'} <span aria-hidden="true">→</span></label></div>
           </fieldset>`;
 }
 
@@ -135,13 +167,28 @@ ${deck.questions.map((question, index) => questionMarkup(deck, question, index))
 }
 
 const cssStateRules = decks.map(deckStateCss).join('\n    ');
+
+// Selector highlighting, per-course mission rows, and the "pick a mission" hint.
+const selectedLabelRules = [
+  ...COURSES.map((course) => `#grade-${course.grade}:checked ~ .game-shell label[for="grade-${course.grade}"]`),
+  ...ALL_MISSIONS.map((mission) => `#mission-${mission.key}:checked ~ .game-shell label[for="mission-${mission.key}"]`)
+];
+const missionRowRules = COURSES.map((course) => `#grade-${course.grade}:checked ~ .game-shell .missions-${course.grade}`).join(',\n    ');
+const hideHintRules = decks.map((deck) => `#grade-${deck.grade}:checked ~ #mission-${deck.mission.key}:checked ~ .game-shell .pick-hint`).join(',\n    ');
+
+function missionRow(course) {
+  const rowClass = course.grade === 'sat' ? 'selector-row missions missions-sat' : `selector-row missions missions-${course.grade}`;
+  return `            <div class="${rowClass}" aria-label="${course.name} missions">
+${course.missions.map((mission) => `              <label class="selector" for="mission-${mission.key}" tabindex="0">${mission.label}<small>${mission.name}</small></label>`).join('\n')}
+            </div>`;
+}
 const html = `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#020817">
-  <title>Lexicon Reactor — English 3 &amp; 4 Vocabulary</title>
+  <title>Lexicon Reactor — English 3, English 4 &amp; SAT Prep Vocabulary</title>
   <style>
     :root {
       color-scheme: dark;
@@ -298,6 +345,11 @@ const html = `<!doctype html>
     .unit-line { margin: 0 0 9px; color: var(--muted); font-size: 0.7rem; font-weight: 850; letter-spacing: 0.08em; text-transform: uppercase; }
     .instruction { margin: 0; color: #bed7e8; font-size: 0.76rem; font-weight: 850; letter-spacing: 0.08em; text-transform: uppercase; }
     .prompt { margin: 10px 0 22px; font-size: clamp(1.16rem, 2.2vw, 1.58rem); font-weight: 740; line-height: 1.38; }
+    .prompt.cue-prompt { color: var(--cyan-soft); font-family: var(--display); font-size: clamp(1.9rem, 4.4vw, 3.1rem); font-style: italic; letter-spacing: 0.04em; line-height: 1.05; text-transform: uppercase; }
+    .prompt.cue-prompt::before, .prompt.cue-prompt::after { content: "“"; color: var(--muted); }
+    .prompt.cue-prompt::after { content: "”"; }
+    .prompt.antonym-prompt { color: var(--pink); }
+    .prompt.passage-prompt { padding: 14px 16px; border-left: 3px solid var(--cyan); border-radius: 4px 12px 12px 4px; background: rgba(37, 230, 255, 0.06); font-size: clamp(1rem, 1.7vw, 1.14rem); font-weight: 600; line-height: 1.58; }
     .prompt.term-prompt { color: var(--gold); font-family: var(--display); font-size: clamp(2.1rem, 5vw, 3.7rem); font-style: italic; letter-spacing: 0.035em; line-height: 1; text-transform: uppercase; }
     .answer-list { display: grid; gap: 9px; }
     .answer {
@@ -341,6 +393,7 @@ const html = `<!doctype html>
       display: grid;
       place-items: center;
       padding: 22px;
+      overflow-y: auto;
       background: linear-gradient(rgba(1, 8, 22, 0.35), rgba(1, 8, 22, 0.76));
       backdrop-filter: blur(7px);
     }
@@ -362,7 +415,12 @@ const html = `<!doctype html>
     .selector-block { margin-top: 22px; text-align: left; }
     .selector-title { display: block; margin-bottom: 8px; color: var(--muted); font-size: 0.68rem; font-weight: 900; letter-spacing: 0.13em; text-transform: uppercase; }
     .selector-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    .selector-row.missions { grid-template-columns: repeat(4, 1fr); }
+    .selector-row.courses { grid-template-columns: repeat(3, 1fr); }
+    .selector-row.missions { display: none; grid-template-columns: repeat(4, 1fr); }
+    .selector-row.missions-sat { grid-template-columns: repeat(5, 1fr); }
+    ${missionRowRules} { display: grid; }
+    .pick-hint { display: flex; width: 100%; min-height: 58px; align-items: center; justify-content: center; padding: 10px; color: var(--muted); border: 1px dashed rgba(37, 230, 255, 0.4); border-radius: 10px 20px 10px 20px; font-size: 0.8rem; font-weight: 850; letter-spacing: 0.08em; text-align: center; text-transform: uppercase; }
+    ${hideHintRules} { display: none; }
     .selector {
       display: grid;
       min-height: 52px;
@@ -381,17 +439,13 @@ const html = `<!doctype html>
     }
     .selector small { display: block; margin-top: 3px; color: var(--muted); font-size: 0.58rem; letter-spacing: 0.04em; }
     .selector:hover, .selector:focus-visible { border-color: var(--cyan); outline: none; background: rgba(8, 49, 84, 0.86); }
-    #grade-3:checked ~ .game-shell label[for="grade-3"], #grade-4:checked ~ .game-shell label[for="grade-4"],
-    #mission-a:checked ~ .game-shell label[for="mission-a"], #mission-b:checked ~ .game-shell label[for="mission-b"],
-    #mission-c:checked ~ .game-shell label[for="mission-c"], #mission-d:checked ~ .game-shell label[for="mission-d"] {
+    ${selectedLabelRules.join(',\n    ')} {
       color: #04141c;
       border-color: var(--cyan-soft);
       background: linear-gradient(100deg, var(--cyan), var(--cyan-soft));
       box-shadow: 0 0 22px rgba(37, 230, 255, 0.25);
     }
-    #grade-3:checked ~ .game-shell label[for="grade-3"] small, #grade-4:checked ~ .game-shell label[for="grade-4"] small,
-    #mission-a:checked ~ .game-shell label[for="mission-a"] small, #mission-b:checked ~ .game-shell label[for="mission-b"] small,
-    #mission-c:checked ~ .game-shell label[for="mission-c"] small, #mission-d:checked ~ .game-shell label[for="mission-d"] small { color: #173741; }
+    ${selectedLabelRules.map((rule) => `${rule} small`).join(',\n    ')} { color: #173741; }
     .start-buttons { margin-top: 14px; }
     .start-control { display: none; width: 100%; min-height: 58px; align-items: center; justify-content: center; color: #00131f; border-radius: 10px 20px 10px 20px; background: linear-gradient(90deg, var(--cyan), #91f4ff 55%, var(--gold)); font-family: var(--display); font-size: 1.25rem; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; box-shadow: 0 13px 32px rgba(37, 230, 255, 0.27); }
     .start-control:hover, .start-control:focus-visible { filter: brightness(1.08); outline: 3px solid rgba(255, 211, 77, 0.76); outline-offset: 4px; }
@@ -414,7 +468,7 @@ const html = `<!doctype html>
       .game-shell { width: calc(100% - 12px); margin: 6px auto; border-radius: 16px; }
       .topbar { min-height: 72px; padding: 12px 14px; }
       .brand p { display: none; }
-      .mission-layout { grid-template-columns: 1fr; gap: 16px; min-height: 900px; padding: 22px 13px 34px; }
+      .mission-layout { grid-template-columns: 1fr; gap: 16px; min-height: 1040px; padding: 22px 13px 34px; }
       .reactor-panel { gap: 8px; }
       .reactor-frame { width: 185px; }
       .reactor-copy span { display: none; }
@@ -423,6 +477,9 @@ const html = `<!doctype html>
       .start-overlay, .complete-overlay, .fail-overlay { inset: 72px 0 0; place-items: start center; padding: 24px 10px; }
       .overlay-card { padding: 28px 16px; }
       .selector-row.missions { grid-template-columns: repeat(2, 1fr); }
+      .selector-row.missions-sat { grid-template-columns: repeat(2, 1fr); }
+      .selector-row.courses { grid-template-columns: 1fr; }
+      .prompt.passage-prompt { padding: 12px; }
       .answer { font-size: 0.84rem; }
       .correct-feedback { align-items: stretch; flex-direction: column; }
       .next-control { width: 100%; }
@@ -441,14 +498,12 @@ const html = `<!doctype html>
   <form id="mission-form">
     <input class="state-control" id="grade-3" type="radio" name="grade" checked>
     <input class="state-control" id="grade-4" type="radio" name="grade">
-    <input class="state-control" id="mission-a" type="radio" name="mission" checked>
-    <input class="state-control" id="mission-b" type="radio" name="mission">
-    <input class="state-control" id="mission-c" type="radio" name="mission">
-    <input class="state-control" id="mission-d" type="radio" name="mission">
+    <input class="state-control" id="grade-sat" type="radio" name="grade">
+${ALL_MISSIONS.map((mission, index) => `    <input class="state-control" id="mission-${mission.key}" type="radio" name="mission"${index === 0 ? ' checked' : ''}>`).join('\n')}
 ${decks.map(stateInputs).join('\n')}
     <main class="game-shell">
       <header class="topbar">
-        <div class="brand"><h1>Lexicon Reactor</h1><p>English 3 + English 4 vocabulary missions</p></div>
+        <div class="brand"><h1>Lexicon Reactor</h1><p>English 3 + English 4 + SAT Prep vocabulary missions</p></div>
         <button class="reset-button" type="reset">Reset Mission</button>
       </header>
       <div class="mission-layout">
@@ -467,21 +522,19 @@ ${decks.map(deckMarkup).join('\n')}
       <section class="start-overlay" aria-labelledby="start-title">
         <div class="overlay-card">
           <h2 id="start-title">Power the Words</h2>
-          <p>Choose your course and mission. Lock all ten vocabulary signals before three misses breach the reactor.</p>
+          <p>Choose your course and mission. Lock all ten vocabulary signals before three misses breach the reactor. SAT Prep adds ten missions built from the most-tested SAT words and Digital SAT Words in Context practice.</p>
           <div class="selector-block">
             <span class="selector-title">1 · Select your course</span>
-            <div class="selector-row">
-              <label class="selector" for="grade-3" tabindex="0">English 3<small>American Literature</small></label>
-              <label class="selector" for="grade-4" tabindex="0">English 4<small>British Literature</small></label>
+            <div class="selector-row courses">
+${COURSES.map((course) => `              <label class="selector" for="grade-${course.grade}" tabindex="0">${course.name}<small>${course.note}</small></label>`).join('\n')}
             </div>
           </div>
           <div class="selector-block">
             <span class="selector-title">2 · Select a mission</span>
-            <div class="selector-row missions">
-${MISSIONS.map((mission) => `              <label class="selector" for="mission-${mission.key}" tabindex="0">${mission.label}<small>${mission.name}</small></label>`).join('\n')}
-            </div>
+${COURSES.map(missionRow).join('\n')}
           </div>
           <div class="start-buttons">
+            <p class="pick-hint">Select a mission for this course</p>
 ${decks.map((deck) => `            <label class="start-control start-${deck.id}" for="start-${deck.id}" tabindex="0">Start Mission ${deck.mission.label}</label>`).join('\n')}
           </div>
           <p class="mission-note">10 signals · 3 shields · complete the mission before the core overloads.</p>

@@ -52,7 +52,7 @@ Create or edit a Canvas page, switch to the HTML editor, and use this wrapper. R
 ```html
 <div style="width:100%;max-width:1180px;margin:0 auto;padding:24px;box-sizing:border-box;border:1px solid #b47724;border-radius:20px;background:linear-gradient(145deg,#061521,#0b2233 58%,#21140d);">
   <h2 style="margin:0 0 6px;color:#f2d39a;font:36px Georgia,serif;">Lexicon Reactor</h2>
-  <p style="margin:0 0 18px;color:#e4c792;font:16px Arial,sans-serif;">Charge the core with the right word using English 3 and English 4 vocabulary.</p>
+  <p style="margin:0 0 18px;color:#e4c792;font:16px Arial,sans-serif;">Charge the core with the right word using English 3, English 4, and SAT Prep vocabulary.</p>
   <div style="padding:10px;border:1px solid rgba(218,164,82,.7);border-radius:16px;background:rgba(2,10,18,.72);">
     <iframe title="Lexicon Reactor Game" src="GAME_DOWNLOAD_URL" loading="lazy" style="display:block;width:100%;height:1180px;border:0;border-radius:11px;background:#08111d;"></iframe>
   </div>
